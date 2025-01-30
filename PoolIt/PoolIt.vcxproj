@@ -134,7 +134,10 @@
     <ClCompile Include="PoolIt.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\StyleSheet.css" />
+    <ClInclude Include="appLogic.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frontend\index.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

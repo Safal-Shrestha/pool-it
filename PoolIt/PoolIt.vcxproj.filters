@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Frontend">
+      <UniqueIdentifier>{fae0910a-aa7a-4779-b238-b15849c6c6f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PoolIt.cpp">
@@ -20,8 +23,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\StyleSheet.css">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="appLogic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frontend\index.html">
+      <Filter>Source Files\Frontend</Filter>
     </None>
   </ItemGroup>
 </Project>

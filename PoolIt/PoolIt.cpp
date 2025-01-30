@@ -6,8 +6,9 @@
 #include <Wt/Http/Response.h>
 #include <fstream>
 #include <iostream>
+#include "appLogic.h"
 
-// Class to handle serving the index.html file
+// Class to serve index.html
 class StaticFileResource : public Wt::WResource {
 public:
     explicit StaticFileResource(const std::string& filePath) : filePath_(filePath) {}
@@ -20,7 +21,6 @@ public:
             return;
         }
 
-        // Serve index.html with correct MIME type
         response.setMimeType("text/html");
         response.setStatus(200);
         response.out() << file.rdbuf();
@@ -30,38 +30,47 @@ private:
     std::string filePath_;
 };
 
-// MainApp class (for backend logic in the future)
-class MainApp : public Wt::WApplication {
-public:
-    explicit MainApp(const Wt::WEnvironment& env) : Wt::WApplication(env) {
-        setTitle("Pool It");
-        // Backend logic can be added later
-    }
-};
+// MainApp constructor
+MainApp::MainApp(const Wt::WEnvironment& env) : Wt::WApplication(env) {
+    setTitle("Pool It");
+    doJavaScript("window.location.href = '/home';");
+}
 
-// Function to set up static file hosting for index.html
+// Handle button clicks
+void ButtonClickHandler::handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) {
+    response.setMimeType("text/plain");
+    response.out() << "Button Clicked!";
+}
+
+// Function to serve static files
 void setupStaticFileHosting(Wt::WServer& server) {
     auto indexResource = std::make_shared<StaticFileResource>("frontend/index.html");
-    server.addResource(indexResource, "/");
-    server.addResource(indexResource, "/index.html");
+    server.addResource(indexResource, "/home");
 }
 
 int main(int argc, char** argv) {
     try {
         Wt::WServer server(argc, argv, WTHTTP_CONFIGURATION);
-        server.setServerConfiguration(argc, argv, WTHTTP_CONFIGURATION);
+        server.addEntryPoint(Wt::EntryPointType::Application,
+            [](const Wt::WEnvironment& env) {
+                return std::make_unique<MainApp>(env);
+            });
 
+        // Serve index.html
         setupStaticFileHosting(server);
 
-        /*server.addEntryPoint(Wt::EntryPointType::Application,
-            [](const Wt::WEnvironment& env) { return std::make_unique<MainApp>(env); });*/
+        // Register button click handler
+        auto buttonHandler = std::make_shared<ButtonClickHandler>();
+        server.addResource(buttonHandler, "/button-click");
 
-        server.run();  // Ensure the server keeps running
+        server.run();
+    }
+    catch (const Wt::WServer::Exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
     }
     catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
         return 1;
     }
-    return 0;
 }
-

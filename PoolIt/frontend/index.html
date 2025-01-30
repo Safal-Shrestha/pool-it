@@ -6,6 +6,22 @@
     <title>Pool It</title>
 </head>
 <body>
-    Nothing Just Test this heheheh
+    <h1>Welcome to Pool It</h1>
+    <button id="myButton">Click Me</button>
+    <p id="responseText"></p>
+
+    <script>
+        document.getElementById("myButton").addEventListener("click", () => {
+            fetch("/button-click", { method: "POST" })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("responseText").innerText = data;
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("responseText").innerText = "Error: Could not connect to server.";
+                });
+        });
+    </script>
 </body>
 </html>
