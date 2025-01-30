@@ -1,0 +1,29 @@
+# Ignore compiled binaries
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.suo
+*.ipch
+*.cache
+*.log
+
+# Ignore Visual Studio generated files
+.vscode/
+.vs/
+*.VC.db
+*.VC.opendb
+*.user
+
+# Ignore build folders
+x64/
+PoolIt/x64/
+Debug/
+Release/
+ipch/
+out/
+
+# Ignore dependency and temporary files
+*.tmp
+*.swp
+
