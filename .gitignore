@@ -27,3 +27,5 @@ out/
 *.tmp
 *.swp
 
+#Ignore evnironmnet variables
+*.env

@@ -8,7 +8,6 @@
 #include <iostream>
 #include "appLogic.h"
 
-// Class to serve index.html
 class StaticFileResource : public Wt::WResource {
 public:
     explicit StaticFileResource(const std::string& filePath) : filePath_(filePath) {}
@@ -30,25 +29,35 @@ private:
     std::string filePath_;
 };
 
-// MainApp constructor
 MainApp::MainApp(const Wt::WEnvironment& env) : Wt::WApplication(env) {
     setTitle("Pool It");
     doJavaScript("window.location.href = '/home';");
 }
 
-// Handle button clicks
 void ButtonClickHandler::handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) {
     response.setMimeType("text/plain");
     response.out() << "Button Clicked!";
 }
 
-// Function to serve static files
+void connectDatabase(std::string db_pass)
+{
+    Wt::Dbo::Session session;
+
+    std::unique_ptr<Wt::Dbo::backend::MySQL> mysqlBackend =
+        std::make_unique<Wt::Dbo::backend::MySQL>("poolit_db", "wt_poolit", db_pass, "127.0.0.1", 3306);
+
+    session.setConnection(std::move(mysqlBackend));
+
+    std::cout << "Connected to MySQL database successfully!" << std::endl;
+}
+
 void setupStaticFileHosting(Wt::WServer& server) {
     auto indexResource = std::make_shared<StaticFileResource>("frontend/index.html");
     server.addResource(indexResource, "/home");
 }
 
 int main(int argc, char** argv) {
+    std::map<std::string, std::string> env = loadEnvFile("creds.env");
     try {
         Wt::WServer server(argc, argv, WTHTTP_CONFIGURATION);
         server.addEntryPoint(Wt::EntryPointType::Application,
@@ -56,14 +65,15 @@ int main(int argc, char** argv) {
                 return std::make_unique<MainApp>(env);
             });
 
-        // Serve index.html
         setupStaticFileHosting(server);
 
-        // Register button click handler
         auto buttonHandler = std::make_shared<ButtonClickHandler>();
         server.addResource(buttonHandler, "/button-click");
 
+        connectDatabase(env["DB_PASSWORD"]);
+
         server.run();
+
     }
     catch (const Wt::WServer::Exception& e) {
         std::cerr << e.what() << std::endl;
