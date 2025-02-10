@@ -1,27 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pool It</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RidePool - Book Ride</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/settings.css">
 </head>
 <body>
-    <h1>Welcome to Pool It</h1>
-    <button id="myButton">Click Me</button>
-    <p id="responseText"></p>
-
-    <script>
-        document.getElementById("myButton").addEventListener("click", () => {
-            fetch("/button-click", { method: "POST" })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("responseText").innerText = data;
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    document.getElementById("responseText").innerText = "Error: Could not connect to server.";
-                });
-        });
-    </script>
+  <nav class="navbar">
+    <div class="app-title">RidePooling App</div>
+    <div class="hamburger">☰</div>
+    <div class="nav-links">
+      <!-- Dropdown for Settings -->
+      <div class="dropdown">
+        <button class="dropdown-button" id="settingsButton">Settings</button>
+        <div class="dropdown-content" id="settingsDropdown">
+          <a href="/update-phone.html">Update Phone Number</a>
+          <a href="/update-email.html">Update Email</a>
+          <a href="/change-password.html">Change Password</a>
+        </div>
+      </div>
+      <a href="#about">About</a>
+      <button class="role-switch" id="roleSwitch">Driver</button>
+    </div>
+  </nav>
+  
+  <div class="main-content">
+    <div id="map"></div>
+    <div class="ride-form">
+      <form id="rideForm">
+        <div class="form-group">
+          <label for="from">From</label>
+          <input type="text" id="from" placeholder="Enter starting point" required>
+        </div>
+        <div class="form-group">
+          <label for="to">To</label>
+          <input type="text" id="to" placeholder="Enter destination" required>
+        </div>
+        <div class="form-group">
+          <label for="time">Departure Time</label>
+          <input type="datetime-local" id="time" required>
+        </div>
+        <div class="form-group" id="seatsGroup">
+          <label for="seats">Available Seats</label>
+          <select id="seats">
+            <option value="1">1 Seat</option>
+            <option value="2">2 Seats</option>
+            <option value="3">3 Seats</option>
+          </select>
+        </div>
+        <button type="submit" id="submitBtn">Offer Ride</button>
+      </form>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/settings.js"></script>
 </body>
 </html>
