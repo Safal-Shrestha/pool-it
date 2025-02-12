@@ -135,9 +135,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="appLogic.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="frontend\assets\css\main.css" />
+    <None Include="frontend\assets\css\setting.css" />
+    <None Include="frontend\assets\css\style.css" />
+    <None Include="frontend\assets\js\main.js" />
+    <None Include="frontend\assets\js\script.js" />
+    <None Include="frontend\forget-password.html" />
     <None Include="frontend\index.html" />
+    <None Include="frontend\login.html" />
+    <None Include="frontend\settings.html" />
+    <None Include="frontend\signup.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

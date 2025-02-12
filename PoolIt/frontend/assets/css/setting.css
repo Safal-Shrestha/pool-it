@@ -30,6 +30,8 @@
     top: 100%;
     left: 0;
     border-radius: 5px;
+    border: none;
+    background: none;
   }
   
   .dropdown-content a {

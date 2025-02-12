@@ -33,6 +33,10 @@ body {
     display: none;
 }
 
+.hamburger, .app-title{
+    outline: none;
+}
+
 .nav-links {
     display: flex;
     gap: 2rem;
@@ -115,6 +119,8 @@ button[type="submit"] {
 
     .nav-links.active {
         display: flex;
+        position: relative;
+        z-index: 99;
     }
 
     .main-content {

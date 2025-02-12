@@ -13,8 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Frontend">
-      <UniqueIdentifier>{fae0910a-aa7a-4779-b238-b15849c6c6f6}</UniqueIdentifier>
+    <Filter Include="Source Files\frontend">
+      <UniqueIdentifier>{d2d7eb5c-d3e3-4699-a065-e3f5299b3b2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\frontend\assets">
+      <UniqueIdentifier>{912a01e8-2720-4c5c-bcfd-ba9dbc094212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\frontend\assets\css">
+      <UniqueIdentifier>{36fc82f6-fcbf-4079-aace-b7556ad843a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\frontend\assets\js">
+      <UniqueIdentifier>{21ba5206-d96c-4e37-bb25-69f12fd2fb72}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -26,10 +35,40 @@
     <ClInclude Include="appLogic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="frontend\forget-password.html">
+      <Filter>Source Files\frontend</Filter>
+    </None>
     <None Include="frontend\index.html">
-      <Filter>Source Files\Frontend</Filter>
+      <Filter>Source Files\frontend</Filter>
+    </None>
+    <None Include="frontend\login.html">
+      <Filter>Source Files\frontend</Filter>
+    </None>
+    <None Include="frontend\settings.html">
+      <Filter>Source Files\frontend</Filter>
+    </None>
+    <None Include="frontend\signup.html">
+      <Filter>Source Files\frontend</Filter>
+    </None>
+    <None Include="frontend\assets\css\main.css">
+      <Filter>Source Files\frontend\assets\css</Filter>
+    </None>
+    <None Include="frontend\assets\css\setting.css">
+      <Filter>Source Files\frontend\assets\css</Filter>
+    </None>
+    <None Include="frontend\assets\css\style.css">
+      <Filter>Source Files\frontend\assets\css</Filter>
+    </None>
+    <None Include="frontend\assets\js\main.js">
+      <Filter>Source Files\frontend\assets\js</Filter>
+    </None>
+    <None Include="frontend\assets\js\script.js">
+      <Filter>Source Files\frontend\assets\js</Filter>
     </None>
   </ItemGroup>
 </Project>
