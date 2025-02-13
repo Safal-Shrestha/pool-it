@@ -162,7 +162,7 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                     .then(data => {
                         console.log("Success:", data);
                     })
-                    .then(window.location.href = "/frontend/rideOngoing.html")
+                    .then(window.location.href = "/frontend/rideOngoingDriver.html")
                     .catch(error => {
                         console.error("Error:", error);
                     });
@@ -178,6 +178,7 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                     .then(data => {
                         console.log("Success:", data);
                     })
+                    .then(window.location.href = "/frontend/rideOngoingPassenger.html")
                     .catch(error => {
                         console.error("Error:", error);
                     });

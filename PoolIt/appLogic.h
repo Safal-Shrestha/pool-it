@@ -211,7 +211,6 @@ private:
     dbo::ptr<User> loggedInUser_;
 };
 
-
 class MainApp : public Wt::WApplication {
 public:
     MainApp(const Wt::WEnvironment& env, DatabaseManager& dbManager, UserSession& userSession);
@@ -340,8 +339,6 @@ public:
     void handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) override {
         dbo::ptr<User> loggedInUser = userSession_.getLoggedInUser();
 
-        std::cout << "User Logged In: " << loggedInUser->uName << std::endl;
-
         if (request.method() == "POST") {
             std::stringstream buffer;
             buffer << request.in().rdbuf();
@@ -386,6 +383,73 @@ public:
                     rideUserTransaction.commit();
                     
 
+                    response.setStatus(200);
+                    response.out() << "{\"status\": \"success\", \"message\": \"Ride Details Updated\"}";
+                }
+                else {
+                    response.setStatus(401);
+                    response.out() << "{\"status\": \"error\", \"message\": \"Ride Details Failed to Update\"}";
+                }
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error: " << e.what() << std::endl;
+                response.setStatus(500);
+                response.out() << "{\"status\": \"error\", \"message\": \"" << e.what() << "\"}";
+            }
+        }
+    }
+
+private:
+    dbo::Session& session_;
+    UserSession& userSession_;
+};
+
+class RideFetch : public Wt::WResource {
+public:
+    RideFetch(DatabaseManager& dbManager, UserSession& userSession)
+        : session_(*dbManager.getSession()), userSession_(userSession) {
+    }
+
+    void handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) override {
+        dbo::ptr<User> loggedInUser = userSession_.getLoggedInUser();
+
+        if (request.method() == "POST") {
+            std::stringstream buffer;
+            buffer << request.in().rdbuf();
+            std::string jsonBody = buffer.str();
+
+            std::cout << "Received login request with body: " << jsonBody << std::endl;
+
+            Wt::Json::Object jsonObject;
+            Wt::Json::parse(jsonBody, jsonObject);
+
+            int user_id = loggedInUser->id;
+            std::string r_from = jsonObject.get("from").toString();
+            std::string r_to = jsonObject.get("to").toString();
+            std::string role = jsonObject.get("role").toString();
+            std::string r_status = "ongoing";
+
+            try {
+                if (loggedInUser) {
+                    Wt::Dbo::Transaction transaction(session_);
+
+                    Wt::Dbo::ptr<Ride> rideResult = session_.find<Ride>()
+                        .where("ride_from = ? AND ride_to = ? AND status = ?")
+                        .bind(r_from).bind(r_to).bind("matchmaking");
+
+                    if (rideResult) {
+                        rideResult.modify()->status = r_status;
+
+                       session_.execute("UPDATE ride SET status = ? WHERE ride_id = ?")
+                            .bind(r_status)
+                            .bind(rideResult.id());
+
+                        transaction.commit();
+                        std::cout << "Status updated successfully" << std::endl;
+                    }
+                    else {
+                        std::cerr << "No matching ride found!" << std::endl;
+                    }
                     response.setStatus(200);
                     response.out() << "{\"status\": \"success\", \"message\": \"Ride Details Updated\"}";
                 }

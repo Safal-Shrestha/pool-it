@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RidePool - Ongoing Ride</title>
+</head>
+<body>
+    <div>
+        <p>Ongoing</p>
+    </div>
+    <button id="completeRide">Complete Ride</button>
+</body>
+<script>
+    document.getElementById('completeRide').addEventListener('click', () => {
+    fetch("http://localhost:8080/api/completeRide", {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Logout successful', data);
+    })
+    .then(window.location.href = '/home')
+    .catch(error => {
+        console.error('Logout error:', error);
+    });
+    });
+</script>
+</html>

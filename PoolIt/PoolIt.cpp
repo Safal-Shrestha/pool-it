@@ -30,6 +30,7 @@ MainApp::MainApp(const Wt::WEnvironment& env, DatabaseManager& dbManager, UserSe
     }
     else {
         std::cout << "User Logged in" << std::endl;
+        doJavaScript("window.location.href='/home';");
     }
 }
 
@@ -62,6 +63,9 @@ int main(int argc, char** argv) {
 
         auto rideUpdateHandler = std::make_shared<RideUpdate>(dbManager, userSession);
         server.addResource(rideUpdateHandler, "/api/rideUpdate");
+
+        auto rideFetchHandler = std::make_shared<RideFetch>(dbManager, userSession);
+        server.addResource(rideFetchHandler, "/api/rideFetch");
 
         auto logoutHandler = std::make_shared<Logout>(userSession);
         server.addResource(logoutHandler, "/api/logout");

@@ -63,18 +63,17 @@
   <script>
     document.getElementById('logout').addEventListener('click', () => {
     fetch("http://localhost:8080/api/logout", {
-        method: 'POST'  // Use POST instead of GET
+        method: 'POST' 
     })
     .then(response => response.json())
     .then(data => {
         console.log('Logout successful', data);
-        // Handle logout success (e.g., redirect or update UI)
     })
     .then(window.location.href = 'frontend/login.html')
     .catch(error => {
         console.error('Logout error:', error);
     });
-});
-</script>
+    });
+  </script>
 </body>
 </html>
