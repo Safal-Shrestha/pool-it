@@ -361,7 +361,7 @@ public:
 
             try {
                 if (loggedInUser) {
-
+                    
                     Wt::Dbo::Transaction transaction(session_);
 
                     Wt::Dbo::ptr<Ride> ride = session_.add(std::make_unique<Ride>());
@@ -371,14 +371,27 @@ public:
                     ride.modify()->status = r_status;
                     ride.modify()->createdAt = std::chrono::system_clock::now();
 
-                    transaction.commit();
+                    Wt::Dbo::ptr<Ride> rideResult = session_.find<Ride>().where("ride_from = ? AND ride_to = ? AND seats = ? AND created_at = ?")
+                        .bind(r_from).bind(r_to).bind(r_seats).bind(ride->createdAt);
+
+                    transaction.commit();                    
+
+                    Wt::Dbo::Transaction rideUserTransaction(session_);
+
+                    Wt::Dbo::ptr<RideUser> rideUser = session_.add(std::make_unique<RideUser>());
+                    rideUser.modify()->ride_id = rideResult.id();
+                    rideUser.modify()->user_id = loggedInUser->id;
+                    rideUser.modify()->user_mode = role;
+
+                    rideUserTransaction.commit();
+                    
 
                     response.setStatus(200);
-                    response.out() << "{\"status\": \"success\", \"message\": \"User Logged In\"}";
+                    response.out() << "{\"status\": \"success\", \"message\": \"Ride Details Updated\"}";
                 }
                 else {
                     response.setStatus(401);
-                    response.out() << "{\"status\": \"error\", \"message\": \"User Not Logged In\"}";
+                    response.out() << "{\"status\": \"error\", \"message\": \"Ride Details Failed to Update\"}";
                 }
             }
             catch (const std::exception& e) {

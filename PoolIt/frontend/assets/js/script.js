@@ -162,6 +162,7 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                     .then(data => {
                         console.log("Success:", data);
                     })
+                    .then(window.location.href = "/frontend/rideOngoing.html")
                     .catch(error => {
                         console.error("Error:", error);
                     });
