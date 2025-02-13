@@ -1,94 +1,120 @@
-// Function to handle form submission
-document.getElementById('loginForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent the form from submitting
+if (document.getElementById('loginForm')) {
+    // Function to handle form submission
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the form from submitting
 
-    // Get input values
-    const email = document.querySelector('input[type="email"]').value;
-    const password = document.querySelector('input[type="password"]').value;
+        const email = document.querySelector('input[type="email"]').value;
+        const password = document.querySelector('input[type="password"]').value;
 
-    // Basic validation
-    if (!email || !password) {
-        alert('Please fill in all fields.');
-        return;
-    }
+        // Get input values
+        const loginDetails = {
+            l_email: email,
+            l_password: password
+        }
 
-    // Simulate a login request (replace with actual API call)
-    console.log('Logging in with:', { email, password });
-    alert('Login successful! Redirecting...');
-    // Redirect to another page or perform further actions
-});
-
-// Function to handle "Sign Up" link click
-// document.querySelector('.signup-link').addEventListener('click', function (event) {
-//     event.preventDefault(); // Prevent the default link behavior
-
-//     // Simulate a sign-up action
-//     console.log('Redirecting to Sign Up page...');
-//     alert('Redirecting to Sign Up page...');
-//     // Redirect to the sign-up page or open a sign-up modal
-// });
-
-
-document.getElementById('signupForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    const citizenshipNumber = document.getElementById('citizenshipNumber').value;
-    const mobile = document.getElementById('mobile').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Validation
-    if (name && email && phone && citizenshipNumber && mobile && password && confirmPassword) {
-        if (password !== confirmPassword) {
-            alert('Passwords do not match!');
+        // Basic validation
+        if (!email || !password) {
+            alert('Please fill in all fields.');
             return;
         }
-        
-        // Add your signup API call here
-        console.log('Signup attempted with:', { name, email, phone, citizenshipNumber, mobile, password });
-        
-        // Success animation
-        document.querySelector('.container').style.transform = 'translateY(-20px)';
-        setTimeout(() => {
-            window.location.href = '/dashboard'; // Redirect to dashboard
-        }, 1000);
-    } else {
-        // Error animation
-        const container = document.querySelector('.container');
-        container.style.animation = 'shake 0.5s';
-        setTimeout(() => {
-            container.style.animation = '';
-        }, 500);
-    }
-});
 
-// Add shake animation for errors
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
-`;
-document.head.appendChild(style);
-
-// Add input interactions
-document.querySelectorAll('.form-group input').forEach(input => {
-    input.addEventListener('focus', () => {
-        input.parentElement.style.transform = 'scale(1.02)';
+        fetch("http://localhost:8080/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(loginDetails)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Success:", data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
     });
+}
+
+if(document.getElementById('signupForm'))
+{
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const phone = parseInt(document.getElementById('phone').value);
+        const citizenshipNumber = document.getElementById('citizenshipNumber').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
     
-    input.addEventListener('blur', () => {
-        input.parentElement.style.transform = 'scale(1)';
+        const signupDetails = {
+            s_name: name,
+            s_email: email,
+            s_phone: phone,
+            s_citizen: citizenshipNumber,
+            s_password: password
+        }
+    
+        // Validation
+        if (name && email && phone && citizenshipNumber && password && confirmPassword) {
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Add your signup API call here
+            fetch("http://localhost:8080/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(signupDetails)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Success:", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            
+            // Success animation
+            document.querySelector('.container').style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                window.location.href = '/home';
+            }, 1000);
+        } else {
+            // Error animation
+            const container = document.querySelector('.container');
+            container.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                container.style.animation = '';
+            }, 500);
+        }
     });
-});
 
+    // Add shake animation for errors
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    `;
+    document.head.appendChild(style);
 
+    // Add input interactions
+    document.querySelectorAll('.form-group input').forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', () => {
+            input.parentElement.style.transform = 'scale(1)';
+        });
+    });
+}
 
 const map = L.map('map').setView([51.505, -0.09], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -124,11 +150,35 @@ const map = L.map('map').setView([51.505, -0.09], 13);
             };
 
             if (isDriver) {
-                console.log('Offering ride:', rideDetails);
-                // Add code to post ride offering to backend
+                fetch("http://localhost:8080/api/rideUpdate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(rideDetails => {
+                        console.log("Success:", rideDetails);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
             } else {
-                console.log('Searching rides:', rideDetails);
-                // Add code to search for matching rides
+                fetch("http://localhost:8080/api/rideFetch", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(rideDetails => {
+                        console.log("Success:", rideDetails);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
             }
         });
 
@@ -143,14 +193,6 @@ const map = L.map('map').setView([51.505, -0.09], 13);
         L.marker([51.5, -0.09]).addTo(map)
             .bindPopup('Available Ride<br>To: Central London')
             .openPopup();
-
-
-
-
-
-
-
-// settings.js
 
 // Toggle dropdown visibility when settings button is clicked
 document.getElementById("settingsButton").addEventListener("click", function(e) {

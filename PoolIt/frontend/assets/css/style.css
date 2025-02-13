@@ -142,7 +142,7 @@ body {
 
 .image-container {
     flex: 1;
-    background: url('/assets/image/car-image.avif') center/cover; /* Cool car image */
+    background: url('/frontend/assets/image/car-image.avif') center/cover; /* Cool car image */
     border-radius: 0 20px 20px 0;
     position: relative;
     overflow: hidden;

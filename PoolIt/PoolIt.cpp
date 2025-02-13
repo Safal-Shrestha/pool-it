@@ -1,11 +1,3 @@
-#include <Wt/WServer.h>
-#include <Wt/WApplication.h>
-#include <Wt/WEnvironment.h>
-#include <Wt/WResource.h>
-#include <Wt/Http/Request.h>
-#include <Wt/Http/Response.h>
-#include <fstream>
-#include <iostream>
 #include "appLogic.h"
 
 class StaticFileResource : public Wt::WResource {
@@ -34,24 +26,7 @@ MainApp::MainApp(const Wt::WEnvironment& env) : Wt::WApplication(env) {
     doJavaScript("window.location.href = '/home';");
 }
 
-void ButtonClickHandler::handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) {
-    response.setMimeType("text/plain");
-    response.out() << "Button Clicked!";
-}
-
-void connectDatabase(std::string db_pass)
-{
-    Wt::Dbo::Session session;
-
-    std::unique_ptr<Wt::Dbo::backend::MySQL> mysqlBackend =
-        std::make_unique<Wt::Dbo::backend::MySQL>("poolit_db", "wt_poolit", db_pass, "127.0.0.1", 3306);
-
-    session.setConnection(std::move(mysqlBackend));
-
-    std::cout << "Connected to MySQL database successfully!" << std::endl;
-}
-
-void setupStaticFileHosting(Wt::WServer& server) {
+void static setupStaticFileHosting(Wt::WServer& server) {
     auto indexResource = std::make_shared<StaticFileResource>("frontend/index.html");
     server.addResource(indexResource, "/home");
 }
@@ -60,6 +35,12 @@ int main(int argc, char** argv) {
     std::map<std::string, std::string> env = loadEnvFile("creds.env");
     try {
         Wt::WServer server(argc, argv, WTHTTP_CONFIGURATION);
+
+        Wt::Dbo::Session session;
+        connectDatabase(env["DB_PASSWORD"]);
+        
+        UserSession userSession(session);
+
         server.addEntryPoint(Wt::EntryPointType::Application,
             [](const Wt::WEnvironment& env) {
                 return std::make_unique<MainApp>(env);
@@ -67,10 +48,10 @@ int main(int argc, char** argv) {
 
         setupStaticFileHosting(server);
 
-        auto buttonHandler = std::make_shared<ButtonClickHandler>();
-        server.addResource(buttonHandler, "/button-click");
+        auto signupHandler = std::make_shared<Signup>(session);
+        server.addResource(signupHandler, "/api/signup");
 
-        connectDatabase(env["DB_PASSWORD"]);
+        
 
         server.run();
 

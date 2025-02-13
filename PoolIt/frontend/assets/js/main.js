@@ -48,11 +48,35 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       if (isDriver) {
-        console.log("Offering ride:", rideDetails);
-        // Add code to post ride offering to backend
+        fetch("http://localhost:8080/api/ride", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log("Success:", result);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
       } else {
-        console.log("Searching rides:", rideDetails);
-        // Add code to search for matching rides
+        fetch("http://localhost:8080/api/search-ride", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log("Success:", result);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
       }
     });
 
