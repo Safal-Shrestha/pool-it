@@ -146,7 +146,7 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                 from: document.getElementById('from').value,
                 to: document.getElementById('to').value,
                 time: document.getElementById('time').value,
-                seats: isDriver ? document.getElementById('seats').value : null,
+                seats: isDriver ? parseInt(document.getElementById('seats').value) : null,
                 role: isDriver ? 'driver' : 'passenger'
             };
 
@@ -156,11 +156,11 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(rideDetails)
                 })
                     .then(response => response.json())
-                    .then(rideDetails => {
-                        console.log("Success:", rideDetails);
+                    .then(data => {
+                        console.log("Success:", data);
                     })
                     .catch(error => {
                         console.error("Error:", error);
@@ -171,11 +171,11 @@ const map = L.map('map').setView([51.505, -0.09], 13);
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(rideDetails)
                 })
                     .then(response => response.json())
-                    .then(rideDetails => {
-                        console.log("Success:", rideDetails);
+                    .then(data => {
+                        console.log("Success:", data);
                     })
                     .catch(error => {
                         console.error("Error:", error);

@@ -21,10 +21,9 @@ private:
     std::string filePath_;
 };
 
-MainApp::MainApp(const Wt::WEnvironment& env, UserSession& userSession) : Wt::WApplication(env), userSession_(userSession) {
+MainApp::MainApp(const Wt::WEnvironment& env, DatabaseManager& dbManager, UserSession& userSession) : Wt::WApplication(env), dbManager_(dbManager), userSession_(userSession) {
     setTitle("Pool It");
-    doJavaScript("window.location.href = '/home';");
-    
+
     if (!userSession_.isLoggedIn()) {
         doJavaScript("window.location.href='/frontend/login.html';");
         std::cout << "Not Logged in" << std::endl;
@@ -49,8 +48,8 @@ int main(int argc, char** argv) {
         UserSession userSession(dbManager);
 
         server.addEntryPoint(Wt::EntryPointType::Application,
-            [&userSession](const Wt::WEnvironment& env) {
-                return std::make_unique<MainApp>(env, userSession);
+            [&dbManager, &userSession](const Wt::WEnvironment& env) {
+                return std::make_unique<MainApp>(env, dbManager, userSession);
             });
 
         setupStaticFileHosting(server);
@@ -61,8 +60,12 @@ int main(int argc, char** argv) {
         auto loginHandler = std::make_shared<Login>(dbManager, userSession);
         server.addResource(loginHandler, "/api/login");
 
+        auto rideUpdateHandler = std::make_shared<RideUpdate>(dbManager, userSession);
+        server.addResource(rideUpdateHandler, "/api/rideUpdate");
+
         auto logoutHandler = std::make_shared<Logout>(userSession);
         server.addResource(logoutHandler, "/api/logout");
+
 
         server.run();
 

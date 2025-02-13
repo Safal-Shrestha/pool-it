@@ -19,14 +19,61 @@
 #include <Wt/Json/Serializer.h>
 #include <map>
 
+std::map<std::string, std::string> loadEnvFile(const std::string& filename) {
+    std::map<std::string, std::string> envMap;
+    std::ifstream file(filename);
+
+    if (!file) {
+        std::cerr << "Error: Unable to open .env file!" << std::endl;
+        return envMap;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue;
+
+        std::istringstream is_line(line);
+        std::string key, value;
+        if (std::getline(is_line, key, '=') && std::getline(is_line, value)) {
+            envMap[key] = value;
+        }
+    }
+
+    return envMap;
+}
+
 namespace dbo = Wt::Dbo;
 
 class User;
+class Ride;
+class RideUser;
 
 namespace Wt {
     namespace Dbo {
         template<>
         struct dbo_traits<User> : public dbo_default_traits {
+            static const char* versionField() {
+                return nullptr;
+            }
+
+            static const char* surrogateIdField() {
+                return nullptr;
+            }
+        };
+
+        template<>
+        struct dbo_traits<Ride> : public dbo_default_traits {
+            static const char* versionField() {
+                return nullptr;
+            }
+
+            static const char* surrogateIdField() {
+                return nullptr;
+            }
+        };
+
+        template<>
+        struct dbo_traits<RideUser> : public dbo_default_traits {
             static const char* versionField() {
                 return nullptr;
             }
@@ -44,7 +91,7 @@ public:
     std::string uName;
     std::string password;
     std::string email;
-    long int phoneNo;
+    long long int phoneNo;
     std::string citizenship;
     std::chrono::system_clock::time_point createdAt;
 
@@ -61,6 +108,45 @@ public:
     }
 };
 
+class Ride {
+public:
+    int id;
+    std::string from;
+    std::string to;
+    int seats;
+    std::chrono::system_clock::time_point createdAt;
+    std::string status;
+
+    template<class Action>
+    void persist(Action& a)
+    {
+        dbo::id(a, id, "ride_id");
+        dbo::field(a, from, "ride_from");
+        dbo::field(a, to, "ride_to");
+        dbo::field(a, seats, "seats");
+        dbo::field(a, createdAt, "created_at");
+        dbo::field(a, status, "status");
+    }
+
+};
+
+class RideUser {
+public:
+    int id;
+    int ride_id;
+    int user_id;
+    std::string user_mode;
+
+    template<class Action>
+    void persist(Action& a)
+    {
+        dbo::id(a, id, "id");
+        dbo::field(a, ride_id, "ride_id");
+        dbo::field(a, user_id, "user_id");
+        dbo::field(a, user_mode, "user_mode");
+    }
+};
+
 class DatabaseManager {
 public:
     DatabaseManager(const std::string& db_pass) {
@@ -73,6 +159,8 @@ public:
 
         session_.setConnection(std::move(mysqlBackend));
         session_.mapClass<User>("userdetails");
+        session_.mapClass<Ride>("ride");
+        session_.mapClass<RideUser>("ride_user");
 
         std::cout << "Database connected" << std::endl;
     }
@@ -126,32 +214,12 @@ private:
 
 class MainApp : public Wt::WApplication {
 public:
-    MainApp(const Wt::WEnvironment& env, UserSession& userSession);
-    UserSession userSession_;
+    MainApp(const Wt::WEnvironment& env, DatabaseManager& dbManager, UserSession& userSession);
+
+private:
+    DatabaseManager& dbManager_;
+    UserSession& userSession_;
 };
-
-std::map<std::string, std::string> loadEnvFile(const std::string& filename) {
-    std::map<std::string, std::string> envMap;
-    std::ifstream file(filename);
-
-    if (!file) {
-        std::cerr << "Error: Unable to open .env file!" << std::endl;
-        return envMap;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '#') continue;
-
-        std::istringstream is_line(line);
-        std::string key, value;
-        if (std::getline(is_line, key, '=') && std::getline(is_line, value)) {
-            envMap[key] = value;
-        }
-    }
-
-    return envMap;
-}
 
 class Signup: public User, public Wt::WResource{
 public:
@@ -172,7 +240,7 @@ public:
 
             std::string name = jsonObject.get("s_name").toString();
             std::string email = jsonObject.get("s_email").toString();
-            long int phone = static_cast<long int>(jsonObject.get("s_phone").toNumber());
+            long long int phone = static_cast<long long int>(jsonObject.get("s_phone").toNumber());
             std::string citizen = jsonObject.get("s_citizen").toString();
             std::string password = jsonObject.get("s_password").toString();
 
@@ -194,10 +262,10 @@ public:
                 else {
                     std::cout << "Login failed after signup" << std::endl;
                 }
+                transaction.commit();
 
                 std::cout << "User Created" << std::endl;
 
-                transaction.commit();
                 response.setStatus(200);
                 response.out() << "{\"status\": \"success\", \"message\": \"User created successfully\"}";
             }
@@ -226,20 +294,15 @@ public:
             buffer << request.in().rdbuf();
             std::string jsonBody = buffer.str();
 
-        std::cout << "Received login request with body: " << jsonBody << std::endl;
-
             Wt::Json::Object jsonObject;
             Wt::Json::parse(jsonBody, jsonObject);
 
             std::string email = jsonObject.get("l_email").toString();
             std::string password = jsonObject.get("l_password").toString();
-            std::cout << email << std::endl;
 
             try {
                 if (userSession_.login(email, password)) {
                     dbo::ptr<User> loggedInUser = userSession_.getLoggedInUser();
-
-                    std::cout << "User Logged In: " << loggedInUser->uName << std::endl;
 
                     response.setStatus(200);
                     response.out() << "{\"status\": \"success\", \"message\": \"Login successful\"}";
@@ -270,22 +333,65 @@ private:
 
 class RideUpdate : public Wt::WResource {
 public:
-    void handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) override{
+    RideUpdate(DatabaseManager& dbManager, UserSession& userSession)
+        : session_(*dbManager.getSession()), userSession_(userSession) {
+    }
+
+    void handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) override {
+        dbo::ptr<User> loggedInUser = userSession_.getLoggedInUser();
+
+        std::cout << "User Logged In: " << loggedInUser->uName << std::endl;
+
         if (request.method() == "POST") {
-            std::string jsonBody;
-            request.in() >> jsonBody;
+            std::stringstream buffer;
+            buffer << request.in().rdbuf();
+            std::string jsonBody = buffer.str();
+
+            std::cout << "Received login request with body: " << jsonBody << std::endl;
 
             Wt::Json::Object jsonObject;
             Wt::Json::parse(jsonBody, jsonObject);
 
-            std::string from = jsonObject.get("from");
-            std::string to = jsonObject.get("to");
-            std::string time = jsonObject.get("time");
-            int seats = jsonObject.get("seats");
+            int user_id = loggedInUser->id;
+            std::string r_from = jsonObject.get("from").toString();
+            std::string r_to = jsonObject.get("to").toString();
+            int r_seats = jsonObject.get("seats");
+            std::string role = jsonObject.get("role").toString();
+            std::string r_status = "matchmaking";
 
-            std::cout << "Received JSON Data: " << from << " to " << to << " at " << time << " (" << seats << " seats)" << std::endl;
+            try {
+                if (loggedInUser) {
+
+                    Wt::Dbo::Transaction transaction(session_);
+
+                    Wt::Dbo::ptr<Ride> ride = session_.add(std::make_unique<Ride>());
+                    ride.modify()->from = r_from;
+                    ride.modify()->to = r_to;
+                    ride.modify()->seats = r_seats;
+                    ride.modify()->status = r_status;
+                    ride.modify()->createdAt = std::chrono::system_clock::now();
+
+                    transaction.commit();
+
+                    response.setStatus(200);
+                    response.out() << "{\"status\": \"success\", \"message\": \"User Logged In\"}";
+                }
+                else {
+                    response.setStatus(401);
+                    response.out() << "{\"status\": \"error\", \"message\": \"User Not Logged In\"}";
+                }
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error: " << e.what() << std::endl;
+                response.setStatus(500);
+                response.out() << "{\"status\": \"error\", \"message\": \"" << e.what() << "\"}";
+            }
         }
     }
+
+private:
+    dbo::Session& session_;
+    UserSession& userSession_;
 };
 
 class Logout : public Wt::WResource {
