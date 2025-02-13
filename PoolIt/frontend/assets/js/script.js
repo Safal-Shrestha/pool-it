@@ -29,6 +29,7 @@ if (document.getElementById('loginForm')) {
             .then(data => {
                 console.log("Success:", data);
             })
+            .then(window.location.href = '/home')
             .catch(error => {
                 console.error("Error:", error);
             });

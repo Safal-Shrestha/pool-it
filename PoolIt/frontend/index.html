@@ -24,6 +24,7 @@
       </div>
       <a href="#about">About</a>
       <button class="role-switch" id="roleSwitch">Driver</button>
+      <button class="logout" id="logout">Logout</button>
     </div>
   </nav>
   
@@ -59,5 +60,21 @@
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="frontend/assets/js/main.js"></script>
   <script src="frontend/assets/js/script.js"></script>
+  <script>
+    document.getElementById('logout').addEventListener('click', () => {
+    fetch("http://localhost:8080/api/logout", {
+        method: 'POST'  // Use POST instead of GET
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Logout successful', data);
+        // Handle logout success (e.g., redirect or update UI)
+    })
+    .then(window.location.href = 'frontend/login.html')
+    .catch(error => {
+        console.error('Logout error:', error);
+    });
+});
+</script>
 </body>
 </html>

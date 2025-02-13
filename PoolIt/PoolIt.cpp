@@ -21,9 +21,17 @@ private:
     std::string filePath_;
 };
 
-MainApp::MainApp(const Wt::WEnvironment& env) : Wt::WApplication(env) {
+MainApp::MainApp(const Wt::WEnvironment& env, UserSession& userSession) : Wt::WApplication(env), userSession_(userSession) {
     setTitle("Pool It");
     doJavaScript("window.location.href = '/home';");
+    
+    if (!userSession_.isLoggedIn()) {
+        doJavaScript("window.location.href='/frontend/login.html';");
+        std::cout << "Not Logged in" << std::endl;
+    }
+    else {
+        std::cout << "User Logged in" << std::endl;
+    }
 }
 
 void static setupStaticFileHosting(Wt::WServer& server) {
@@ -36,22 +44,25 @@ int main(int argc, char** argv) {
     try {
         Wt::WServer server(argc, argv, WTHTTP_CONFIGURATION);
 
-        Wt::Dbo::Session session;
-        connectDatabase(env["DB_PASSWORD"]);
+        DatabaseManager dbManager(env["DB_PASSWORD"]);
         
-        UserSession userSession(session);
+        UserSession userSession(dbManager);
 
         server.addEntryPoint(Wt::EntryPointType::Application,
-            [](const Wt::WEnvironment& env) {
-                return std::make_unique<MainApp>(env);
+            [&userSession](const Wt::WEnvironment& env) {
+                return std::make_unique<MainApp>(env, userSession);
             });
 
         setupStaticFileHosting(server);
 
-        auto signupHandler = std::make_shared<Signup>(session);
+        auto signupHandler = std::make_shared<Signup>(dbManager, userSession);
         server.addResource(signupHandler, "/api/signup");
 
-        
+        auto loginHandler = std::make_shared<Login>(dbManager, userSession);
+        server.addResource(loginHandler, "/api/login");
+
+        auto logoutHandler = std::make_shared<Logout>(userSession);
+        server.addResource(logoutHandler, "/api/logout");
 
         server.run();
 
